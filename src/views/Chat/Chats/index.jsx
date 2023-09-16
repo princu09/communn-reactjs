@@ -1,54 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import ContactList from './ContactList';
-import ChatBody from './ChatBody';
-import ChatInfo from './ChatInfo';
-import ChatFooter from '../ChatFooter';
-import classNames from 'classnames';
-import InvitePeopleModal from '../InvitePeopleModal';
-import ChatHeader from '../ChatHeader';
-import { useWindowWidth } from '@react-hook/window-size';
+import React, { useEffect, useState } from "react";
+import ContactList from "./ContactList";
+import ChatBody from "./ChatBody";
+import ChatInfo from "./ChatInfo";
+import ChatFooter from "../ChatFooter";
+import classNames from "classnames";
+import InvitePeopleModal from "../InvitePeopleModal";
+import ChatHeader from "../ChatHeader";
+import { useWindowWidth } from "@react-hook/window-size";
+import { useSelector } from "react-redux";
 //Redux
-import { connect } from 'react-redux';
-import { StartConversation } from '../../../redux/action/Chat';
 
-const Chats = ({ startChating }) => {
+const Chats = ({}) => {
+  const [showInfo, setShowInfo] = useState(true);
+  const [invitePeople, setInvitePeople] = useState(false);
 
-    const [showInfo, setShowInfo] = useState(true);
-    const [invitePeople, setInvitePeople] = useState(false);
+  const windowWidth = useWindowWidth();
+  useEffect(() => {
+    if (windowWidth <= 1199) {
+      setShowInfo(false);
+    } else {
+      setShowInfo(true);
+    }
+  }, [windowWidth]);
 
-    const windowWidth = useWindowWidth();
-    useEffect(() => {
-        if (windowWidth <= 1199) {
-            setShowInfo(false);
-        }
-        else {
-            setShowInfo(true)
-        }
-    }, [windowWidth])
+  const { currentChat } = useSelector((state) => state.chatReducer);
 
-    return (
-        <div className="hk-pg-body py-0">
-            <div className={classNames("chatapp-wrap", { "chatapp-info-active": showInfo }, { "chatapp-slide": startChating })}>
-                <div className="chatapp-content">
-                    <ContactList invitePeople={() => setInvitePeople(!invitePeople)} />
-                    <div className="chatapp-single-chat">
-                        <ChatHeader infoState={showInfo} infoToggle={() => setShowInfo(!showInfo)} invitePeople={() => setInvitePeople(!invitePeople)} />
-                        <ChatBody />
-                        <ChatFooter />
-                        <ChatInfo infoToggle={() => setShowInfo(!showInfo)} />
-                    </div>
-                    {/* Invite People */}
-                    <InvitePeopleModal show={invitePeople} onClose={() => setInvitePeople(!invitePeople)} />
-                </div>
+  const [newMessage, setNewMessage] = useState(false);
+
+  return (
+    <div className="hk-pg-body py-0">
+      <div
+        className={classNames(
+          "chatapp-wrap",
+          { "chatapp-info-active": showInfo }
+          //   { "chatapp-slide": startChating }
+        )}
+      >
+        <div className="chatapp-content">
+          <ContactList invitePeople={() => setInvitePeople(!invitePeople)} />
+          {currentChat == null ? (
+            <div className=""></div>
+          ) : (
+            <div className="chatapp-single-chat">
+              <ChatHeader
+                infoState={showInfo}
+                infoToggle={() => setShowInfo(!showInfo)}
+                invitePeople={() => setInvitePeople(!invitePeople)}
+              />
+              <ChatBody setNewMessage={setNewMessage} newMessage={newMessage} />
+              <ChatFooter setNewMessage={setNewMessage} />
+              <ChatInfo infoToggle={() => setShowInfo(!showInfo)} />
             </div>
+          )}
+          {/* Invite People */}
+          <InvitePeopleModal
+            show={invitePeople}
+            onClose={() => setInvitePeople(!invitePeople)}
+          />
         </div>
-
-    )
-}
-
-const mapStateToProps = ({ chatReducer }) => {
-    const { startChating } = chatReducer;
-    return { startChating }
+      </div>
+    </div>
+  );
 };
 
-export default connect(mapStateToProps, { StartConversation })(Chats);
+export default Chats;

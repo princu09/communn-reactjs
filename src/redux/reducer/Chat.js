@@ -1,56 +1,78 @@
-import { START_CHATING, SENT_MSG, REPLY_MSG, GROUP_MSG, CONTACT_MSG, SET_USER } from "../constants/Chat";
-//images
-import avatar8 from '../../assets/dist/img/avatar8.jpg';
+// http://localhost:3001/api/v1/users/list
 
-const initialState = {
-    startChating: false,
-    avatar: avatar8,
-    userId: 2,
-    userName: "Huma Therman",
-    msg: [],
-    grpMsg: [],
-    contactMsg: [],
-    rplyMsg: [],
-};
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
+import Cookies from "js-cookie";
 
-const ChatReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case START_CHATING:
-            return {
-                ...state,
-                startChating: action.startChating
-            };
-        case SENT_MSG:
-            return {
-                ...state,
-                msg: [...state.msg, action.msg]
-            };
-        case SET_USER:
-            return {
-                ...state,
-                userId: action.userId,
-                avatar: action.avatar,
-                userName: action.userName,
+// All Users Get Here
+export const getAllConv = createAsyncThunk(
+  "getAllConv",
+  async (data, { rejectWithValue }) => {
+    try {
+      const { search } = data;
 
-            };
-        case GROUP_MSG:
-            return {
-                ...state,
-                grpMsg: [...state.grpMsg, action.grpMsg]
-            };
-        case CONTACT_MSG:
-            return {
-                ...state,
-                contactMsg: [...state.contactMsg, action.contactMsg]
-            };
-        case REPLY_MSG:
-            return {
-                ...state,
-                rplyMsg: [...state.rplyMsg, action.rplyMsg]
-            };
-        default:
-            return state;
+      const res = await axios.post(
+        `http://localhost:3001/api/v1/users/chats?search=${search}`,
+        {
+          myId: Cookies.get("refreshToken"),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const result = await res.data;
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
     }
+  }
+);
+
+// Initial State
+const initialState = {
+  currentChat: null,
+  data: [],
+  loading: false,
+  error: null,
+  message: null,
+  pagination: null,
 };
 
-export default ChatReducer;
+// Slice
+const ChatSlice = createSlice({
+  name: "chatAPI",
+  initialState,
+  reducers: {
+    handleCurrentChat: (state, action) => {
+      state.currentChat = action.payload;
+    },
+    handleLastMessage: (state, action) => {
+      const { chatId, content, createdAt } = action.payload;
+      const index = state.data.findIndex((item) => item._id === chatId);
+      state.data[index].lastMessage = {
+        content,
+      };
+      state.data[index].updatedAt = createdAt;
+    },
+  },
+  extraReducers: {
+    [getAllConv.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [getAllConv.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data = action.payload.data;
+      state.pagination = action.payload.pagination;
+    },
+    [getAllConv.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action;
+    },
+  },
+});
+
+export const { handleCurrentChat, handleLastMessage } = ChatSlice.actions;
+
+export default ChatSlice.reducer;

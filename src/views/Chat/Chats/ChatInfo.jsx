@@ -12,7 +12,6 @@ import {
   faGoogleDrive,
 } from "@fortawesome/free-brands-svg-icons";
 //Redux
-import { connect } from "react-redux";
 
 //Images
 import avatar1 from "../../../assets/dist/img/avatar1.jpg";
@@ -625,9 +624,4 @@ const ChatInfo = ({ infoToggle, avatar, userName }) => {
   );
 };
 
-const mapStateToProps = ({ chatReducer }) => {
-  const { avatar, userName } = chatReducer;
-  return { avatar, userName };
-};
-
-export default connect(mapStateToProps)(ChatInfo);
+export default ChatInfo;
