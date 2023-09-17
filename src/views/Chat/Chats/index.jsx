@@ -27,6 +27,9 @@ const Chats = ({}) => {
 
   const [newMessage, setNewMessage] = useState(false);
 
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+
   return (
     <div className="hk-pg-body py-0">
       <div
@@ -46,9 +49,17 @@ const Chats = ({}) => {
                 infoState={showInfo}
                 infoToggle={() => setShowInfo(!showInfo)}
                 invitePeople={() => setInvitePeople(!invitePeople)}
+                isTyping={isTyping}
               />
-              <ChatBody setNewMessage={setNewMessage} newMessage={newMessage} />
-              <ChatFooter setNewMessage={setNewMessage} />
+              <ChatBody
+                setNewMessage={setNewMessage}
+                newMessage={newMessage}
+                typing={typing}
+                setTyping={setTyping}
+                isTyping={isTyping}
+                setIsTyping={setIsTyping}
+              />
+              <ChatFooter setNewMessage={setNewMessage} setTyping={setTyping} />
               <ChatInfo infoToggle={() => setShowInfo(!showInfo)} />
             </div>
           )}

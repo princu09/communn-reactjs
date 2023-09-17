@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { sendMessage as NewMessage } from "../../redux/reducer/Message";
 import { handleLastMessage } from "../../redux/reducer/Chat";
 
-const ChatFooter = ({ setNewMessage }) => {
+const ChatFooter = ({ setNewMessage, setTyping }) => {
   const [message, setMessage] = useState("");
 
   const dispatch = useDispatch();
@@ -35,11 +35,17 @@ const ChatFooter = ({ setNewMessage }) => {
     sendMessage();
     setMessage("");
   };
+
   const onKeyDown = (e) => {
     if (e.keyCode === 13) {
       sendMessage();
       setMessage("");
     }
+  };
+
+  const handleTyping = (e) => {
+    setMessage(e.target.value);
+    setTyping(true);
   };
 
   return (
@@ -115,7 +121,7 @@ const ChatFooter = ({ setNewMessage }) => {
             className="input-msg-send rounded-input"
             placeholder="Type your message..."
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleTyping}
             onKeyDown={onKeyDown}
           />
           <span className="input-suffix">

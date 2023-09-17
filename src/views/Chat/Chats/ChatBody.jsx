@@ -3,16 +3,111 @@ import { Button, Dropdown, Spinner } from "react-bootstrap";
 import { CornerUpRight, MoreHorizontal } from "react-feather";
 import SimpleBar from "simplebar-react";
 import { useDispatch, useSelector } from "react-redux";
-import { clearMessages, getAllMessage } from "../../../redux/reducer/Message";
+import {
+  clearMessages,
+  clearNewMessage,
+  getAllMessage,
+  handleReceiveMessage,
+} from "../../../redux/reducer/Message";
 import moment from "moment";
+import io from "socket.io-client";
+import Cookies from "js-cookie";
+import typingGIF from "../../../assets/typing.gif";
+import { handleOnline } from "../../../redux/reducer/Chat";
 
-const ChatBody = ({ newMessage, setNewMessage }) => {
+const ENDPOINT = "http://localhost:3001";
+var socket;
+
+const ChatBody = ({
+  newMessage,
+  setNewMessage,
+  typing,
+  setTyping,
+  isTyping,
+  setIsTyping,
+}) => {
   const avatar = "https://via.placeholder.com/150";
 
   const { currentChat } = useSelector((state) => state.chatReducer);
-  const { data: messages, pagination } = useSelector(
-    (state) => state.messageReducer
-  );
+  const [socketConnected, setSocketConnected] = useState(false);
+
+  const {
+    data: messages,
+    pagination,
+    newMessage: messageSocket,
+  } = useSelector((state) => state.messageReducer);
+
+  // Socket Logic
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.emit("setup", { myId: Cookies.get("refreshToken") });
+    socket.on("typing", (userId) => {
+      if (userId !== Cookies.get("refreshToken")) {
+        setIsTyping(true);
+      }
+    });
+    socket.on("stop typing", (userId) => {
+      if (userId !== Cookies.get("refreshToken")) {
+        setIsTyping(false);
+      }
+    });
+
+    socket.on("online user", (online) => {
+      dispatch(handleOnline(online));
+    });
+
+    return () => {
+      socket.emit("close", Cookies.get("refreshToken"));
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.emit("join chat", currentChat._id, Cookies.get("refreshToken"));
+
+    setTyping(false);
+    setIsTyping(false);
+  }, [currentChat]);
+
+  useEffect(() => {
+    socket.on("message received", (message) => {
+      if (message.chat._id !== currentChat._id) {
+        // give a notification
+      } else {
+        dispatch(handleReceiveMessage({ ...message, sendByMe: false }));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (messageSocket) {
+      socket.emit("new message", messageSocket);
+    }
+    dispatch(clearNewMessage());
+  }, [messageSocket]);
+
+  useEffect(() => {
+    if (!socketConnected) {
+      console.log("socket not connected");
+      return;
+    }
+
+    if (typing) {
+      setTyping(true);
+      socket.emit("typing", {
+        chatId: currentChat._id,
+        userId: Cookies.get("refreshToken"),
+      });
+    }
+
+    setTimeout(() => {
+      socket.emit("stop typing", {
+        chatId: currentChat._id,
+        userId: Cookies.get("refreshToken"),
+      });
+      setTyping(false);
+    }, 5000);
+  }, [typing]);
 
   const dispatch = useDispatch();
   const [pageNo, setPageNo] = useState(1);
@@ -108,14 +203,14 @@ const ChatBody = ({ newMessage, setNewMessage }) => {
           }
 
           return (
-            <>
+            <div key={index}>
               {dateLine && (
                 <li className="day-sep">
                   <span>{dateLine}</span>
                 </li>
               )}
               {message.sendByMe ? (
-                <li className="media sent" key={index}>
+                <li className="media sent">
                   <div className="media-body">
                     <div className="msg-box">
                       <div>
@@ -155,7 +250,7 @@ const ChatBody = ({ newMessage, setNewMessage }) => {
                   </div>
                 </li>
               ) : (
-                <li className="media received" key={index}>
+                <li className="media received">
                   <div className="media-body">
                     <div className="msg-box">
                       <div>
@@ -193,10 +288,11 @@ const ChatBody = ({ newMessage, setNewMessage }) => {
                   </div>
                 </li>
               )}
-            </>
+            </div>
           );
         })}
       </ul>
+
       <div ref={bottomRef} />
     </SimpleBar>
   );

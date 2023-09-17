@@ -65,6 +65,7 @@ const initialState = {
   error: null,
   message: null,
   pagination: null,
+  newMessage: null,
 };
 
 // Slice
@@ -76,25 +77,38 @@ const MessageSlice = createSlice({
       state.data = undefined;
       state.data = [];
     },
+    clearNewMessage: (state, action) => {
+      state.newMessage = undefined;
+      state.newMessage = null;
+    },
+    handleReceiveMessage: (state, action) => {
+      const newMessage = action.payload;
+      state.data.push(newMessage);
+    },
   },
   extraReducers: {
     [getAllMessage.pending]: (state, action) => {
       state.loading = true;
     },
     [getAllMessage.fulfilled]: (state, action) => {
-      const newMessage = action.payload.data;
+      const newMessages = action.payload.data.map((message) => ({
+        ...message,
+        updatedAt: new Date(message.updatedAt).toISOString(), // Convert updatedAt to ISO string
+        createdAt: new Date(message.createdAt).toISOString(), // Convert createdAt to ISO string
+      }));
 
-      const newMessageIds = newMessage.map((message) => message._id);
+      const newMessageIds = newMessages.map((message) => message._id);
 
       const filteredData = state.data.filter(
         (message) => !newMessageIds.includes(message._id)
       );
 
-      state.data = [...newMessage, ...filteredData];
+      state.data = [...newMessages, ...filteredData];
 
       state.pagination = action.payload.pagination;
       state.loading = false;
     },
+
     [getAllMessage.rejected]: (state, action) => {
       state.loading = false;
       state.error = action;
@@ -102,12 +116,16 @@ const MessageSlice = createSlice({
     [sendMessage.fulfilled]: (state, action) => {
       const newMessage = action.payload.data;
       newMessage.sendByMe = true;
+      newMessage.updatedAt = new Date(newMessage.updatedAt).toISOString();
+      newMessage.createdAt = new Date(newMessage.createdAt).toISOString();
       state.data.push(newMessage);
       state.loading = false;
+      state.newMessage = newMessage;
     },
   },
 });
 
-export const { clearMessages } = MessageSlice.actions;
+export const { clearMessages, handleReceiveMessage, clearNewMessage } =
+  MessageSlice.actions;
 
 export default MessageSlice.reducer;

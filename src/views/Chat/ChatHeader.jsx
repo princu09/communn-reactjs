@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Dropdown } from "react-bootstrap";
 import {
   Archive,
@@ -26,7 +26,6 @@ import avatar1 from "../../assets/dist/img/avatar1.jpg";
 import avatar2 from "../../assets/dist/img/avatar2.jpg";
 import HkBadge from "../../components/@hk-badge/@hk-badge";
 import { useSelector } from "react-redux";
-import { clearMessages } from "../../redux/reducer/Message";
 
 const ChatHeader = ({
   topNavCollapsed,
@@ -36,8 +35,7 @@ const ChatHeader = ({
   invitePeople,
   StartConversation,
   startChating,
-  avatar,
-  userName,
+  isTyping,
 }) => {
   const [audioCall, setAudioCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
@@ -54,6 +52,8 @@ const ChatHeader = ({
   };
 
   const { currentChat } = useSelector((state) => state.chatReducer);
+
+  console.log(currentChat);
 
   return (
     <>
@@ -83,7 +83,7 @@ const ChatHeader = ({
                   />
                 )}
                 <HkBadge
-                  bg="success"
+                  bg={currentChat.online ? "success" : "danger"}
                   indicator
                   className="badge-indicator-lg position-bottom-end-overflow-1"
                 />
@@ -91,11 +91,18 @@ const ChatHeader = ({
             </div>
             <div className="media-body">
               <div className="user-name">{currentChat.name}</div>
-              {/* <div className="user-status">
-                Typing<span className="one">.</span>
-                <span className="two">.</span>
-                <span className="three">.</span>
-              </div> */}
+              {isTyping && (
+                <div
+                  className="user-status"
+                  style={{
+                    color: "#43c800",
+                  }}
+                >
+                  Typing<span className="one">.</span>
+                  <span className="two">.</span>
+                  <span className="three">.</span>
+                </div>
+              )}
             </div>
           </div>
         )}

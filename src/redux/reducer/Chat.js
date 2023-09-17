@@ -53,8 +53,12 @@ const ChatSlice = createSlice({
       const index = state.data.findIndex((item) => item._id === chatId);
       state.data[index].lastMessage = {
         content,
+        createdAt: new Date(createdAt).toISOString(),
       };
-      state.data[index].updatedAt = createdAt;
+      state.data[index].updatedAt = new Date(createdAt).toISOString();
+    },
+    handleOnline: (state, action) => {
+      state.currentChat.online = action.payload;
     },
   },
   extraReducers: {
@@ -73,6 +77,7 @@ const ChatSlice = createSlice({
   },
 });
 
-export const { handleCurrentChat, handleLastMessage } = ChatSlice.actions;
+export const { handleCurrentChat, handleLastMessage, handleOnline } =
+  ChatSlice.actions;
 
 export default ChatSlice.reducer;
