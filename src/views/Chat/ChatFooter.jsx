@@ -4,13 +4,15 @@ import { Button, Dropdown, Form, InputGroup } from "react-bootstrap";
 import { ArrowRight, Share, Smile } from "react-feather";
 import { useDispatch, useSelector } from "react-redux";
 import { sendMessage as NewMessage } from "../../redux/reducer/Message";
-import { handleLastMessage } from "../../redux/reducer/Chat";
+import { handleChatList, handleLastMessage } from "../../redux/reducer/Chat";
 
 const ChatFooter = ({ setNewMessage, setTyping }) => {
   const [message, setMessage] = useState("");
 
   const dispatch = useDispatch();
-  const { currentChat } = useSelector((state) => state.chatReducer);
+  const { currentChat, data: chatList } = useSelector(
+    (state) => state.chatReducer
+  );
 
   const sendMessage = () => {
     dispatch(
@@ -28,6 +30,17 @@ const ChatFooter = ({ setNewMessage, setTyping }) => {
         createdAt: new Date(),
       })
     );
+
+    // change chat list order
+    const newChatList = chatList.filter((chat) => chat._id !== currentChat._id);
+    const currentChatIndex = chatList.filter(
+      (chat) => chat._id === currentChat._id
+    );
+
+    newChatList.unshift(currentChatIndex[0]);
+
+    dispatch(handleChatList(newChatList));
+
     setNewMessage(true);
   };
 

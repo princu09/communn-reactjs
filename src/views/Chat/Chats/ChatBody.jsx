@@ -12,7 +12,6 @@ import {
 import moment from "moment";
 import io from "socket.io-client";
 import Cookies from "js-cookie";
-import typingGIF from "../../../assets/typing.gif";
 import { handleOnline } from "../../../redux/reducer/Chat";
 
 const ENDPOINT = "http://localhost:3001";
@@ -112,7 +111,7 @@ const ChatBody = ({
   const dispatch = useDispatch();
   const [pageNo, setPageNo] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [goToBottom, setGoToBottom] = useState(false);
+  const [goToBottom, setGoToBottom] = useState(true);
   // 👇️ scroll to bottom every time messages change
   const bottomRef = useRef(null);
   const topRef = useRef(null);
@@ -148,7 +147,7 @@ const ChatBody = ({
   };
 
   useEffect(() => {
-    if (bottomRef.current && goToBottom) {
+    if (bottomRef.current) {
       bottomRef.current.scrollIntoView({
         behavior: "smooth",
         block: "end",
@@ -251,6 +250,15 @@ const ChatBody = ({
                 </li>
               ) : (
                 <li className="media received">
+                  {currentChat.isGroupChat && (
+                    <div className="avatar avatar-xs avatar-rounded">
+                      <img
+                        src={"https://random.imagecdn.app/500/500"}
+                        alt="user"
+                        className="avatar-img"
+                      />
+                    </div>
+                  )}
                   <div className="media-body">
                     <div className="msg-box">
                       <div>

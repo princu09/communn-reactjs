@@ -58,4 +58,6 @@ const UsersSlice = createSlice({
   },
 });
 
+// Actions
+
 export default UsersSlice.reducer;

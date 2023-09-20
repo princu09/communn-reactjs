@@ -17,8 +17,12 @@ import {
 import avatar1 from "../../../assets/dist/img/avatar1.jpg";
 import avatar2 from "../../../assets/dist/img/avatar2.jpg";
 import thumbImg from "../../../assets/dist/img/img-thumb1.jpg";
+import HkTooltip from "../../../components/@hk-tooltip/HkTooltip";
+import { useSelector } from "react-redux";
 
 const ChatInfo = ({ infoToggle, avatar, userName }) => {
+  const { currentChat } = useSelector((state) => state.chatReducer);
+
   return (
     <div className="chat-info">
       <SimpleBar style={{ height: "100%" }} className="nicescroll-bar">
@@ -70,6 +74,65 @@ const ChatInfo = ({ infoToggle, avatar, userName }) => {
                 />
               </Form>
               <div className="collapse-simple mt-3">
+                <p className="fw-medium">Group Admin</p>
+                <div className="avatar avatar-sm avatar-primary avatar-rounded mt-3">
+                  <HkTooltip
+                    placement="top"
+                    title={currentChat?.admin?.first_name}
+                  >
+                    <span className="initial-wrap">
+                      {currentChat?.admin?.first_name[0]}
+                    </span>
+                  </HkTooltip>
+                </div>
+
+                {currentChat?.isGroupChat && (
+                  <Card>
+                    <Card.Header>
+                      <Link
+                        role="button"
+                        data-bs-toggle="collapse"
+                        to="#members"
+                        aria-expanded="true"
+                      >
+                        Members
+                      </Link>
+                    </Card.Header>
+
+                    <div id="members" className="collapse show">
+                      <Card.Body>
+                        <ul className="hk-list">
+                          {currentChat?.members?.map((member, index) => (
+                            <li key={index}>
+                              <div className="avatar avatar-sm avatar-primary avatar-rounded">
+                                <HkTooltip
+                                  placement="top"
+                                  title={member?.first_name}
+                                >
+                                  <span className="initial-wrap">
+                                    {member?.first_name[0]}
+                                  </span>
+                                </HkTooltip>
+                              </div>
+                            </li>
+                          ))}
+
+                          {/* <li>
+                            <div className="avatar avatar-sm avatar-rounded">
+                              <HkTooltip placement="top" title="Morgan">
+                                <img
+                                  src={avatar2}
+                                  alt="user"
+                                  className="avatar-img"
+                                />
+                              </HkTooltip>
+                            </div>
+                          </li> */}
+                        </ul>
+                      </Card.Body>
+                    </div>
+                  </Card>
+                )}
                 <Card>
                   <Card.Header>
                     <Link

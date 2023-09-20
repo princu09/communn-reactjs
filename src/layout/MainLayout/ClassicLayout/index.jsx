@@ -41,7 +41,7 @@ const LayoutClassic = ({
         { hk__email__backdrop: maximize }
       )}
       data-layout="vertical"
-      data-layout-style={navCollapsed ? "collapsed" : "default"}
+      // data-layout-style={navCollapsed ? "collapsed" : "default"}
       data-navbar-style={topNavCollapsed ? "collapsed" : ""}
       data-menu="light"
       data-footer="simple"
@@ -50,7 +50,7 @@ const LayoutClassic = ({
       {/* Top Navbar */}
       <TopNav />
       {/* Vertical Nav */}
-      <Sidebar />
+      {/* <Sidebar /> */}
       {/* Chat-bot */}
       {dashboardRoute && <ChatBotInterface show={false} />}
       <div className={classNames("hk-pg-wrapper", { "pb-0": appRoutes })}>

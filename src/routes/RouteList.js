@@ -21,7 +21,8 @@ import ChatPopup from "../views/ChatPopup/DirectMessage";
 import ChatBot from "../views/ChatPopup/ChatBot";
 
 export const routes = [
-  { path: "dashboard", exact: true, component: Dashboard },
+  { path: "/", exact: true, component: Chats },
+  { path: "dashboard", exact: true, component: Chats },
   //Apps
   { path: "apps/chat/chats", exact: true, component: Chats },
   { path: "apps/chat/chat-groups", exact: true, component: ChatGroups },

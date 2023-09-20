@@ -5,6 +5,11 @@ import SimpleBar from "simplebar-react";
 import avatar2 from "../../assets/dist/img/avatar2.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers } from "../../redux/reducer/Users";
+import {
+  NewChat,
+  getAllConv,
+  handleCurrentChat,
+} from "../../redux/reducer/Chat";
 
 const InvitePeopleModal = ({ show, onClose }) => {
   const dispatch = useDispatch();
@@ -20,6 +25,27 @@ const InvitePeopleModal = ({ show, onClose }) => {
       })
     );
   }, [dispatch, Search]);
+
+  const handleNewChat = (user) => {
+    const a = dispatch(
+      NewChat({
+        userId: user._id,
+      })
+    ).then((res) => {
+      dispatch(
+        getAllConv({
+          search: Search,
+        })
+      );
+      dispatch(
+        handleCurrentChat({
+          currentChat: res.payload.data,
+        })
+      );
+    });
+
+    onClose();
+  };
 
   return (
     <Modal show={show} onHide={onClose} centered dialogClassName="mw-400p">
@@ -46,7 +72,7 @@ const InvitePeopleModal = ({ show, onClose }) => {
                 <li
                   key={user._id}
                   onClick={() => {
-                    alert(user._id);
+                    handleNewChat(user);
                   }}
                   style={{
                     cursor: "pointer",

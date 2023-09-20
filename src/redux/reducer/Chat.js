@@ -30,9 +30,36 @@ export const getAllConv = createAsyncThunk(
   }
 );
 
+export const NewChat = createAsyncThunk(
+  "NewChat",
+  async (data, { rejectWithValue }) => {
+    try {
+      const { userId } = data;
+
+      await axios.post(
+        `http://localhost:3001/api/v1/users/newChat`,
+        {
+          userId,
+          myId: Cookies.get("refreshToken"),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 // Initial State
 const initialState = {
   currentChat: null,
+  updateChat: false,
   data: [],
   loading: false,
   error: null,
@@ -60,6 +87,10 @@ const ChatSlice = createSlice({
     handleOnline: (state, action) => {
       state.currentChat.online = action.payload;
     },
+    handleChatList: (state, action) => {
+      state.data = action.payload;
+      state.updateChat = !state.updateChat;
+    },
   },
   extraReducers: {
     [getAllConv.pending]: (state, action) => {
@@ -77,7 +108,11 @@ const ChatSlice = createSlice({
   },
 });
 
-export const { handleCurrentChat, handleLastMessage, handleOnline } =
-  ChatSlice.actions;
+export const {
+  handleCurrentChat,
+  handleLastMessage,
+  handleOnline,
+  handleChatList,
+} = ChatSlice.actions;
 
 export default ChatSlice.reducer;

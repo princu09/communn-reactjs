@@ -36,9 +36,6 @@ const ClassicRoutes = (props) => {
                   />
                 ) : null;
               })}
-              <Route path="*">
-                <Redirect to="/error-404" />
-              </Route>
             </Switch>
           </LayoutClassic>
         </Suspense>

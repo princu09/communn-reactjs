@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SimpleBar from "simplebar-react";
 import { Link } from "react-router-dom";
 import classNames from "classnames";
@@ -19,7 +19,7 @@ const ContactList = ({ invitePeople }) => {
 
   const dispatch = useDispatch();
 
-  const { data: list } = useSelector((state) => state.chatReducer);
+  const { data: list, updateChat } = useSelector((state) => state.chatReducer);
 
   useEffect(() => {
     dispatch(
@@ -31,14 +31,26 @@ const ContactList = ({ invitePeople }) => {
 
   const Conversation = (index) => {
     setActiveUser(index?._id);
+
     dispatch(
       handleCurrentChat({
         _id: index?._id,
         name: index?.chatName,
         image: index?.groupImage,
+        isGroupChat: index?.isGroupChat,
+        members: index?.users,
+        admin: index?.groupAdmin,
       })
     );
   };
+
+  useEffect(() => {
+    dispatch(
+      getAllConv({
+        search: "priyanshi",
+      })
+    );
+  }, [searchValue]);
 
   return (
     <>
@@ -142,6 +154,7 @@ const ContactList = ({ invitePeople }) => {
             </Link>
           </div>
         </header>
+
         <SimpleBar style={{ height: "100%" }} className="aside-body">
           <Form className="aside-search" role="search">
             <Form.Control

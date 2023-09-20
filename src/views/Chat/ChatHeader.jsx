@@ -40,8 +40,8 @@ const ChatHeader = ({
   const [audioCall, setAudioCall] = useState(false);
   const [videoCall, setVideoCall] = useState(false);
 
-  const chatsRoute = useRouteMatch("/apps/chat/chats");
-  const groupRoutes = useRouteMatch("/apps/chat/chat-groups");
+  const chatsRoute = useRouteMatch("/");
+  const groupRoutes = useRouteMatch("/group");
   const contactsRoute = useRouteMatch("/apps/chat/chat-contact");
 
   const width = useWindowWidth();
@@ -52,8 +52,6 @@ const ChatHeader = ({
   };
 
   const { currentChat } = useSelector((state) => state.chatReducer);
-
-  console.log(currentChat);
 
   return (
     <>

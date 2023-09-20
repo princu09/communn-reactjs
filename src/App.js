@@ -5,15 +5,17 @@ import AuthRoutes from "./routes/AuthRoutes";
 import "bootstrap/js/src/collapse";
 import ScrollToTop from "./utils/ScrollToTop";
 import useAuth from "./context/auth";
+import Cookies from "js-cookie";
 
 function App() {
-  const { user: auth } = useAuth();
+  // const { user: auth } = useAuth();
+
+  const auth = Cookies.get("refreshToken");
 
   return (
     <>
       <ScrollToTop>
         <Switch>
-          <Redirect exact from="/" to="/dashboard" />
           {auth ? (
             <>
               <Route
