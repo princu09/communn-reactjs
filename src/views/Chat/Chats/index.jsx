@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ContactList from "./ContactList";
-import ChatBody from "./ChatBody";
+import ChatBody, { socket } from "./ChatBody";
 import ChatInfo from "./ChatInfo";
 import ChatFooter from "../ChatFooter";
 import classNames from "classnames";
@@ -8,7 +8,8 @@ import InvitePeopleModal from "../InvitePeopleModal";
 import ChatHeader from "../ChatHeader";
 import { useWindowWidth } from "@react-hook/window-size";
 import { useSelector } from "react-redux";
-//Redux
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Chats = ({}) => {
   const [showInfo, setShowInfo] = useState(true);
@@ -30,14 +31,35 @@ const Chats = ({}) => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
+  const [messageData, setMessageData] = useState(null);
+
+  useEffect(() => {
+    if (messageData != null) {
+      console.log("messageData", messageData);
+      toast.success(messageData, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      setTimeout(() => {
+        setMessageData(null);
+      }, 5000);
+    }
+  }, [messageData]);
+
   return (
     <div className="hk-pg-body py-0">
+      <ToastContainer />
       <div
-        className={classNames(
-          "chatapp-wrap",
-          { "chatapp-info-active": showInfo }
-          //   { "chatapp-slide": startChating }
-        )}
+        className={classNames("chatapp-wrap", {
+          "chatapp-info-active": showInfo,
+        })}
       >
         <div className="chatapp-content">
           <ContactList invitePeople={() => setInvitePeople(!invitePeople)} />
@@ -58,6 +80,7 @@ const Chats = ({}) => {
                 setTyping={setTyping}
                 isTyping={isTyping}
                 setIsTyping={setIsTyping}
+                setMessageData={setMessageData}
               />
               <ChatFooter setNewMessage={setNewMessage} setTyping={setTyping} />
               <ChatInfo infoToggle={() => setShowInfo(!showInfo)} />

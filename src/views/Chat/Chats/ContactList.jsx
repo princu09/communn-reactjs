@@ -19,7 +19,7 @@ const ContactList = ({ invitePeople }) => {
 
   const dispatch = useDispatch();
 
-  const { data: list, updateChat } = useSelector((state) => state.chatReducer);
+  const { data: list, currentChat } = useSelector((state) => state.chatReducer);
 
   useEffect(() => {
     dispatch(
@@ -30,8 +30,6 @@ const ContactList = ({ invitePeople }) => {
   }, [dispatch]);
 
   const Conversation = (index) => {
-    setActiveUser(index?._id);
-
     dispatch(
       handleCurrentChat({
         _id: index?._id,
@@ -51,6 +49,10 @@ const ContactList = ({ invitePeople }) => {
       })
     );
   }, [searchValue]);
+
+  useEffect(() => {
+    setActiveUser(currentChat?._id);
+  }, [currentChat]);
 
   return (
     <>
@@ -172,7 +174,7 @@ const ContactList = ({ invitePeople }) => {
                   className={classNames(
                     "media",
                     { "active-user": elem._id === activeUser },
-                    { "read-chat": !elem.unread }
+                    { "read-chat": !elem.unreadMessages }
                   )}
                 >
                   <div className="media-head">
@@ -201,9 +203,9 @@ const ContactList = ({ invitePeople }) => {
                         {elem?.updatedAt &&
                           moment(elem?.updatedAt).format("hh:mm A")}
                       </div>
-                      {elem.unread > 0 && (
+                      {elem.unreadMessages > 0 && (
                         <div className="badge badge-primary badge-sm badge-pill">
-                          {elem.unread}
+                          {elem.unreadMessages}
                         </div>
                       )}
                       <div className="dropdown action-drp">

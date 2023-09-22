@@ -74,6 +74,11 @@ const ChatSlice = createSlice({
   reducers: {
     handleCurrentChat: (state, action) => {
       state.currentChat = action.payload;
+
+      const index = state.data.findIndex(
+        (item) => item._id === action.payload._id
+      );
+      state.data[index].unreadMessages = 0;
     },
     handleLastMessage: (state, action) => {
       const { chatId, content, createdAt } = action.payload;

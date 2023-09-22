@@ -58,6 +58,29 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
+// Mutual Groups
+export const mutualGroups = createAsyncThunk(
+  "sendMessage",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/v1/users/mutual-groups",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const result = await res.data.data;
+
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message);
+    }
+  }
+);
+
 // Initial State
 const initialState = {
   data: [],
@@ -66,6 +89,7 @@ const initialState = {
   message: null,
   pagination: null,
   newMessage: null,
+  mutualGroupsList: [],
 };
 
 // Slice
@@ -84,6 +108,11 @@ const MessageSlice = createSlice({
     handleReceiveMessage: (state, action) => {
       const newMessage = action.payload;
       state.data.push(newMessage);
+    },
+    readMessages: (state, action) => {
+      state.data.forEach((message) => {
+        message.isRead = true;
+      });
     },
   },
   extraReducers: {
@@ -108,7 +137,6 @@ const MessageSlice = createSlice({
       state.pagination = action.payload.pagination;
       state.loading = false;
     },
-
     [getAllMessage.rejected]: (state, action) => {
       state.loading = false;
       state.error = action;
@@ -122,10 +150,18 @@ const MessageSlice = createSlice({
       state.loading = false;
       state.newMessage = newMessage;
     },
+    [mutualGroups.fulfilled]: (state, action) => {
+      state.mutualGroupsList = action.payload;
+      state.loading = false;
+    },
   },
 });
 
-export const { clearMessages, handleReceiveMessage, clearNewMessage } =
-  MessageSlice.actions;
+export const {
+  clearMessages,
+  handleReceiveMessage,
+  clearNewMessage,
+  readMessages,
+} = MessageSlice.actions;
 
 export default MessageSlice.reducer;

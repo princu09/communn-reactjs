@@ -3,11 +3,9 @@ import SimpleBar from "simplebar-react";
 //Images
 import avatar2 from "../../assets/dist/img/avatar2.jpg";
 import avatar3 from "../../assets/dist/img/avatar3.jpg";
-import avatar4 from "../../assets/dist/img/avatar4.jpg";
 import avatar10 from "../../assets/dist/img/avatar10.jpg";
 import avatar12 from "../../assets/dist/img/avatar12.jpg";
 import {
-  AlignLeft,
   Bell,
   Calendar,
   CheckSquare,
@@ -15,25 +13,14 @@ import {
   CreditCard,
   Inbox,
   Plus,
-  Search,
   Settings,
   Tag,
 } from "react-feather";
-import {
-  Button,
-  Container,
-  Dropdown,
-  Form,
-  InputGroup,
-  Nav,
-  Navbar,
-} from "react-bootstrap";
+import { Button, Container, Dropdown, Nav, Navbar } from "react-bootstrap";
 import { toggleCollapsedNav } from "../../redux/action/Theme";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 // import CustomInput from './CustomInput';
-import classNames from "classnames";
-import { motion } from "framer-motion";
 import HkBadge from "../../components/@hk-badge/@hk-badge";
 import useAuth from "../../context/auth";
 

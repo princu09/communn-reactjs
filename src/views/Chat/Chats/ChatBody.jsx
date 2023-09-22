@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Dropdown, Spinner } from "react-bootstrap";
+import { Button, Dropdown, Spinner, Toast } from "react-bootstrap";
 import { CornerUpRight, MoreHorizontal } from "react-feather";
 import SimpleBar from "simplebar-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,22 +8,24 @@ import {
   clearNewMessage,
   getAllMessage,
   handleReceiveMessage,
+  readMessages,
 } from "../../../redux/reducer/Message";
 import moment from "moment";
 import io from "socket.io-client";
 import Cookies from "js-cookie";
 import { handleOnline } from "../../../redux/reducer/Chat";
+import HkTooltip from "../../../components/@hk-tooltip/HkTooltip";
 
 const ENDPOINT = "http://localhost:3001";
-var socket;
+export var socket;
 
 const ChatBody = ({
   newMessage,
   setNewMessage,
   typing,
   setTyping,
-  isTyping,
   setIsTyping,
+  setMessageData,
 }) => {
   const avatar = "https://via.placeholder.com/150";
 
@@ -41,8 +43,11 @@ const ChatBody = ({
     socket = io(ENDPOINT);
     socket.on("connected", () => setSocketConnected(true));
     socket.emit("setup", { myId: Cookies.get("refreshToken") });
-    socket.on("typing", (userId) => {
-      if (userId !== Cookies.get("refreshToken")) {
+    socket.on("typing", (data) => {
+      if (
+        data.user !== Cookies.get("refreshToken") &&
+        data.chatId === currentChat._id
+      ) {
         setIsTyping(true);
       }
     });
@@ -70,10 +75,14 @@ const ChatBody = ({
 
   useEffect(() => {
     socket.on("message received", (message) => {
-      if (message.chat._id !== currentChat._id) {
-        // give a notification
-      } else {
+      if (message?.chat?._id === currentChat._id) {
         dispatch(handleReceiveMessage({ ...message, sendByMe: false }));
+        socket.emit("read message", {
+          chatId: currentChat._id,
+          userId: Cookies.get("refreshToken"),
+        });
+      } else {
+        setMessageData(message?.sender?.first_name + " sent a message");
       }
     });
   }, []);
@@ -131,6 +140,18 @@ const ChatBody = ({
           pageNo,
         })
       );
+      socket.emit("read message", {
+        chatId: currentChat._id,
+        userId: Cookies.get("refreshToken"),
+      });
+      socket.on("read message", (data) => {
+        if (
+          data.chatId === currentChat._id &&
+          data.userId !== Cookies.get("refreshToken")
+        ) {
+          dispatch(readMessages({ chatId: data.chatId }));
+        }
+      });
       setIsLoading(false);
     }
   }, [currentChat, pageNo]);
@@ -214,9 +235,53 @@ const ChatBody = ({
                     <div className="msg-box">
                       <div>
                         <p>{message?.content}</p>
-                        <span className="chat-time">
-                          {moment(message?.createdAt).format("hh:mm A")}
-                        </span>
+                        <div className="d-flex align-items-center gap-1">
+                          <span className="chat-time">
+                            {moment(message?.createdAt).format("hh:mm A")}
+                          </span>
+                          {!message?.isRead ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="icon icon-tabler icon-tabler-check"
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              stroke-width="2.5"
+                              stroke="#c0c0c0"
+                              fill="none"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M5 12l5 5l10 -10" />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="icon icon-tabler icon-tabler-checks"
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              stroke-width="2.5"
+                              stroke="#ffffff"
+                              fill="none"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                stroke="none"
+                                d="M0 0h24v24H0z"
+                                fill="none"
+                              />
+                              <path d="M7 12l5 5l10 -10" />
+                              <path d="M2 12l5 5m5 -5l5 -5" />
+                            </svg>
+                          )}
+                        </div>
                       </div>
                       <div className="msg-action">
                         <Button className="btn-icon btn-flush-dark btn-rounded flush-soft-hover no-caret">
@@ -251,19 +316,24 @@ const ChatBody = ({
               ) : (
                 <li className="media received">
                   {currentChat.isGroupChat && (
-                    <div className="avatar avatar-xs avatar-rounded">
-                      <img
-                        src={"https://random.imagecdn.app/500/500"}
-                        alt="user"
-                        className="avatar-img"
-                      />
+                    <div className="avatar avatar-xs avatar-rounded me-3">
+                      <div className="avatar avatar-sm avatar-primary avatar-rounded">
+                        <HkTooltip
+                          placement="top"
+                          title={message?.sender?.first_name[0]}
+                        >
+                          <span className="initial-wrap">
+                            {message?.sender?.first_name[0]}
+                          </span>
+                        </HkTooltip>
+                      </div>
                     </div>
                   )}
                   <div className="media-body">
                     <div className="msg-box">
                       <div>
                         <p>{message?.content}</p>
-                        <span className="chat-time">10:52 PM</span>
+                        {moment(message?.createdAt).format("hh:mm A")}
                       </div>
                       <div className="msg-action">
                         <Button className="btn-icon btn-flush-dark btn-rounded flush-soft-hover no-caret">

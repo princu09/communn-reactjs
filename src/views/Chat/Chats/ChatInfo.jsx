@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Dropdown, Form, Nav, Tab } from "react-bootstrap";
 import SimpleBar from "simplebar-react";
 import { Link } from "react-router-dom";
@@ -18,10 +18,32 @@ import avatar1 from "../../../assets/dist/img/avatar1.jpg";
 import avatar2 from "../../../assets/dist/img/avatar2.jpg";
 import thumbImg from "../../../assets/dist/img/img-thumb1.jpg";
 import HkTooltip from "../../../components/@hk-tooltip/HkTooltip";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { mutualGroups } from "../../../redux/reducer/Message";
+import Cookies from "js-cookie";
+import { handleCurrentChat } from "../../../redux/reducer/Chat";
 
 const ChatInfo = ({ infoToggle, avatar, userName }) => {
   const { currentChat } = useSelector((state) => state.chatReducer);
+
+  const { mutualGroupsList } = useSelector((state) => state.messageReducer);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const userId = currentChat.members.find(
+      (member) => member._id === Cookies.get("refreshToken")
+    )._id;
+
+    const myId = Cookies.get("refreshToken");
+
+    dispatch(
+      mutualGroups({
+        userId,
+        myId,
+      })
+    );
+  }, [currentChat]);
 
   return (
     <div className="chat-info">
@@ -74,17 +96,51 @@ const ChatInfo = ({ infoToggle, avatar, userName }) => {
                 />
               </Form>
               <div className="collapse-simple mt-3">
-                <p className="fw-medium">Group Admin</p>
-                <div className="avatar avatar-sm avatar-primary avatar-rounded mt-3">
-                  <HkTooltip
-                    placement="top"
-                    title={currentChat?.admin?.first_name}
-                  >
-                    <span className="initial-wrap">
-                      {currentChat?.admin?.first_name[0]}
-                    </span>
-                  </HkTooltip>
-                </div>
+                {currentChat?.isGroupChat ? (
+                  <>
+                    <p className="fw-medium">Group Admin</p>
+                    <div className="avatar avatar-sm avatar-primary avatar-rounded mt-3">
+                      <HkTooltip
+                        placement="top"
+                        title={currentChat?.admin?.first_name}
+                      >
+                        <span className="initial-wrap">
+                          {currentChat?.admin?.first_name[0]}
+                        </span>
+                      </HkTooltip>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="fw-medium">Mutual Groups</p>
+                    {mutualGroupsList.map((group, index) => (
+                      <div
+                        className="avatar avatar-sm avatar-primary avatar-rounded mt-3"
+                        key={index}
+                        onClick={() => {
+                          dispatch(
+                            handleCurrentChat({
+                              _id: group?._id,
+                              name: group?.chatName,
+                              image:
+                                group?.groupImage ||
+                                "https://random.imagecdn.app/500/500",
+                              isGroupChat: group?.isGroupChat,
+                              members: group?.users,
+                              unreadMessages: group?.unreadMessages,
+                            })
+                          );
+                        }}
+                      >
+                        <HkTooltip placement="top" title={group?.chatName}>
+                          <span className="initial-wrap">
+                            {group?.chatName[0]}
+                          </span>
+                        </HkTooltip>
+                      </div>
+                    ))}
+                  </>
+                )}
 
                 {currentChat?.isGroupChat && (
                   <Card>
