@@ -23,7 +23,7 @@ import { mutualGroups } from "../../../redux/reducer/Message";
 import Cookies from "js-cookie";
 import { handleCurrentChat } from "../../../redux/reducer/Chat";
 
-const ChatInfo = ({ infoToggle, avatar, userName }) => {
+const ChatInfo = ({ infoToggle, avatar, userName, addToGroup }) => {
   const { currentChat } = useSelector((state) => state.chatReducer);
 
   const { mutualGroupsList } = useSelector((state) => state.messageReducer);
@@ -112,33 +112,37 @@ const ChatInfo = ({ infoToggle, avatar, userName }) => {
                   </>
                 ) : (
                   <>
-                    <p className="fw-medium">Mutual Groups</p>
-                    {mutualGroupsList.map((group, index) => (
-                      <div
-                        className="avatar avatar-sm avatar-primary avatar-rounded mt-3"
-                        key={index}
-                        onClick={() => {
-                          dispatch(
-                            handleCurrentChat({
-                              _id: group?._id,
-                              name: group?.chatName,
-                              image:
-                                group?.groupImage ||
-                                "https://random.imagecdn.app/500/500",
-                              isGroupChat: group?.isGroupChat,
-                              members: group?.users,
-                              unreadMessages: group?.unreadMessages,
-                            })
-                          );
-                        }}
-                      >
-                        <HkTooltip placement="top" title={group?.chatName}>
-                          <span className="initial-wrap">
-                            {group?.chatName[0]}
-                          </span>
-                        </HkTooltip>
-                      </div>
-                    ))}
+                    {mutualGroupsList && mutualGroupsList.length > 0 && (
+                      <>
+                        <p className="fw-medium">Mutual Groups</p>
+                        {mutualGroupsList.map((group, index) => (
+                          <div
+                            className="avatar avatar-sm avatar-primary avatar-rounded mt-3"
+                            key={index}
+                            onClick={() => {
+                              dispatch(
+                                handleCurrentChat({
+                                  _id: group?._id,
+                                  name: group?.chatName,
+                                  image:
+                                    group?.groupImage ||
+                                    "https://random.imagecdn.app/500/500",
+                                  isGroupChat: group?.isGroupChat,
+                                  members: group?.users,
+                                  unreadMessages: group?.unreadMessages,
+                                })
+                              );
+                            }}
+                          >
+                            <HkTooltip placement="top" title={group?.chatName}>
+                              <span className="initial-wrap">
+                                {group?.chatName[0]}
+                              </span>
+                            </HkTooltip>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </>
                 )}
 
@@ -173,17 +177,15 @@ const ChatInfo = ({ infoToggle, avatar, userName }) => {
                             </li>
                           ))}
 
-                          {/* <li>
-                            <div className="avatar avatar-sm avatar-rounded">
+                          <li onClick={() => addToGroup()}>
+                            <div className="avatar avatar-sm avatar-primary avatar-rounded">
                               <HkTooltip placement="top" title="Morgan">
-                                <img
-                                  src={avatar2}
-                                  alt="user"
-                                  className="avatar-img"
-                                />
+                                <span className="initial-wrap">
+                                  <i className="ri-add-line" />
+                                </span>
                               </HkTooltip>
                             </div>
-                          </li> */}
+                          </li>
                         </ul>
                       </Card.Body>
                     </div>

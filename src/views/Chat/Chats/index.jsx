@@ -10,10 +10,12 @@ import { useWindowWidth } from "@react-hook/window-size";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AddPeopleGroup from "../AddPeopleGroup";
 
 const Chats = ({}) => {
   const [showInfo, setShowInfo] = useState(true);
   const [invitePeople, setInvitePeople] = useState(false);
+  const [addToGroup, setAddToGroup] = useState(false);
 
   const windowWidth = useWindowWidth();
   useEffect(() => {
@@ -83,13 +85,21 @@ const Chats = ({}) => {
                 setMessageData={setMessageData}
               />
               <ChatFooter setNewMessage={setNewMessage} setTyping={setTyping} />
-              <ChatInfo infoToggle={() => setShowInfo(!showInfo)} />
+              <ChatInfo
+                infoToggle={() => setShowInfo(!showInfo)}
+                addToGroup={() => setAddToGroup(!addToGroup)}
+              />
             </div>
           )}
           {/* Invite People */}
           <InvitePeopleModal
             show={invitePeople}
             onClose={() => setInvitePeople(!invitePeople)}
+          />
+
+          <AddPeopleGroup
+            show={addToGroup}
+            onClose={() => setAddToGroup(!addToGroup)}
           />
         </div>
       </div>

@@ -13,12 +13,14 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const InvitePeopleModal = ({ show, onClose }) => {
+const AddPeopleGroup = ({ show, onClose }) => {
   const dispatch = useDispatch();
 
   const [Search, setSearch] = useState("");
 
   const { data } = useSelector((state) => state.usersReducer);
+
+  const { currentChat } = useSelector((state) => state.chatReducer);
 
   useEffect(() => {
     dispatch(
@@ -54,7 +56,7 @@ const InvitePeopleModal = ({ show, onClose }) => {
   };
 
   const [memberList, setMemberList] = useState(data);
-  const [group, setGroup] = useState(false);
+  const [group, setGroup] = useState(true);
   const [groupName, setGroupName] = useState("");
 
   const handleGroup = (newId) => {
@@ -76,8 +78,8 @@ const InvitePeopleModal = ({ show, onClose }) => {
     const members = newMembers.map((user) => user._id);
 
     await axios
-      .post("http://localhost:3001/api/v1/users/create-group", {
-        groupName: groupName,
+      .post("http://localhost:3001/api/v1/users/add-member", {
+        chatId: currentChat._id,
         myId: Cookies.get("refreshToken"),
         userIds: members,
       })
@@ -110,33 +112,15 @@ const InvitePeopleModal = ({ show, onClose }) => {
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <p className="d-flex gap-2 p-2">
-            <Form.Switch
-              value={group}
-              onChange={(e) => setGroup(e.target.checked)}
-            />
-            Create a new chat ?
-          </p>
-
-          {group && (
-            <>
-              <Form.Control
-                type="text"
-                className="user-search"
-                placeholder="Group Name"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              />
-
-              <Button
-                className="btn btn-primary btn-block mt-3"
-                type="button"
-                onClick={() => handleCreateGroup()}
-              >
-                Create Group
-              </Button>
-            </>
-          )}
+          <>
+            <Button
+              className="btn btn-primary btn-block mt-3"
+              type="button"
+              onClick={() => handleCreateGroup()}
+            >
+              Add to Group
+            </Button>
+          </>
         </Form>
         <div className="h-350p">
           <SimpleBar style={{ height: "100%" }} className="nicescroll-bar">
@@ -185,4 +169,4 @@ const InvitePeopleModal = ({ show, onClose }) => {
   );
 };
 
-export default InvitePeopleModal;
+export default AddPeopleGroup;
