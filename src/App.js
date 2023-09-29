@@ -4,7 +4,6 @@ import ClassicRoutes from "./routes/Classic";
 import AuthRoutes from "./routes/AuthRoutes";
 import "bootstrap/js/src/collapse";
 import ScrollToTop from "./utils/ScrollToTop";
-import useAuth from "./context/auth";
 import Cookies from "js-cookie";
 
 function App() {

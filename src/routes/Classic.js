@@ -1,6 +1,6 @@
 import { AnimatePresence } from "framer-motion";
 import React, { Suspense } from "react";
-import { Route, Redirect, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import PageAnimate from "../components/Animation/PageAnimate";
 import LayoutClassic from "../layout/MainLayout/ClassicLayout";
 import { routes } from "./RouteList";

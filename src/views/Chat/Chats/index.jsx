@@ -7,19 +7,59 @@ import classNames from "classnames";
 import InvitePeopleModal from "../InvitePeopleModal";
 import ChatHeader from "../ChatHeader";
 import { useWindowWidth } from "@react-hook/window-size";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddPeopleGroup from "../AddPeopleGroup";
-import io from "socket.io-client";
-
-const ENDPOINT = "http://localhost:3001";
-export var socket;
+import { useSocket } from "../../../context/socketContext";
+import {
+  getAllConv,
+  handleLastMessage,
+  handleUnreadMessages,
+} from "../../../redux/reducer/Chat";
+import Cookies from "js-cookie";
 
 const Chats = ({}) => {
+  const socket = useSocket();
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    socket = io(ENDPOINT);
-  }, [io]);
+    socket.on("connect", () => {
+      console.log("connected");
+
+      socket.emit("setup", { myId: Cookies.get("refreshToken") });
+    });
+
+    socket.on("chat created", () => {
+      dispatch(
+        getAllConv({
+          search: "",
+        })
+      );
+    });
+
+    socket.on("message received", (message) => {
+      console.log("message received", message);
+      if (
+        message?.sender?._id !== Cookies.get("refreshToken") &&
+        message?.chat?._id !== currentChat?._id
+      ) {
+        dispatch(
+          handleUnreadMessages({
+            _id: message?.chat?._id,
+          })
+        );
+      }
+
+      dispatch(
+        handleLastMessage({
+          chatId: message?.chat?._id,
+          content: message?.content,
+          createdAt: new Date().toISOString(),
+        })
+      );
+    });
+  }, [socket]);
 
   const [showInfo, setShowInfo] = useState(true);
   const [invitePeople, setInvitePeople] = useState(false);

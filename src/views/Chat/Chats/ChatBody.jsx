@@ -11,10 +11,10 @@ import {
   readMessages,
 } from "../../../redux/reducer/Message";
 import moment from "moment";
-import { socket } from "./index";
 import Cookies from "js-cookie";
 import { handleOnline, handleReadMessages } from "../../../redux/reducer/Chat";
 import HkTooltip from "../../../components/@hk-tooltip/HkTooltip";
+import { useSocket } from "../../../context/socketContext";
 
 const ChatBody = ({
   newMessage,
@@ -24,6 +24,7 @@ const ChatBody = ({
   setIsTyping,
   setMessageData,
 }) => {
+  const socket = useSocket();
   const { currentChat } = useSelector((state) => state.chatReducer);
   const [socketConnected, setSocketConnected] = useState(false);
 
@@ -138,6 +139,7 @@ const ChatBody = ({
           pageNo,
         })
       );
+
       socket.emit("read message", {
         chatId: currentChat._id,
         userId: Cookies.get("refreshToken"),

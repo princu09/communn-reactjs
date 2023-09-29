@@ -108,7 +108,7 @@ const MessageSlice = createSlice({
     handleReceiveMessage: (state, action) => {
       const newMessage = action.payload;
 
-      if (state.data.find((message) => message._id !== newMessage._id)) {
+      if (state.data.find((message) => message._id == newMessage._id)) {
         return;
       } else {
         state.data.push(newMessage);

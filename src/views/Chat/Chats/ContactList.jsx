@@ -15,11 +15,13 @@ import {
   handleUnreadMessages,
 } from "../../../redux/reducer/Chat";
 import moment from "moment";
-import { socket } from "./index";
 import Cookies from "js-cookie";
 import { clearMessages } from "../../../redux/reducer/Message";
+import { useSocket } from "../../../context/socketContext";
 
 const ContactList = ({ invitePeople }) => {
+  const socket = useSocket();
+
   const [activeUser, setActiveUser] = useState(null);
   const [searchValue, setSearchValue] = useState("");
 
@@ -63,35 +65,6 @@ const ContactList = ({ invitePeople }) => {
   useEffect(() => {
     setActiveUser(currentChat?._id);
   }, [currentChat]);
-
-  useEffect(() => {
-    if (socket && socket.connected) {
-      socket.emit("setup", { myId: Cookies.get("refreshToken") });
-
-      socket.on("message received", (message) => {
-        if (
-          message?.sender?._id !== Cookies.get("refreshToken") &&
-          message?.chat?._id !== currentChat?._id
-        ) {
-          dispatch(
-            handleUnreadMessages({
-              _id: message?.chat?._id,
-            })
-          );
-        }
-
-        dispatch(
-          handleLastMessage({
-            chatId: message?.chat?._id,
-            content: message?.content,
-            createdAt: new Date().toISOString(),
-          })
-        );
-      });
-    } else {
-      console.log("socket not connected");
-    }
-  }, [socket, currentChat?._id]);
 
   return (
     <>

@@ -12,8 +12,11 @@ import {
 } from "../../redux/reducer/Chat";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useSocket } from "../../context/socketContext";
 
 const InvitePeopleModal = ({ show, onClose }) => {
+  const socket = useSocket();
+
   const dispatch = useDispatch();
 
   const [Search, setSearch] = useState("");
@@ -33,11 +36,15 @@ const InvitePeopleModal = ({ show, onClose }) => {
   }, [data]);
 
   const handleNewChat = (user) => {
-    const a = dispatch(
+    dispatch(
       NewChat({
         userId: user._id,
       })
     ).then((res) => {
+      socket.emit("create chat", {
+        users: [user._id, Cookies.get("refreshToken")],
+      });
+
       dispatch(
         getAllConv({
           search: Search,
@@ -82,6 +89,10 @@ const InvitePeopleModal = ({ show, onClose }) => {
         userIds: members,
       })
       .then((res) => {
+        socket.emit("create chat", {
+          users: [Cookies.get("refreshToken"), ...members],
+        });
+
         dispatch(
           getAllConv({
             search: Search,
