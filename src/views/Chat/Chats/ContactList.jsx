@@ -8,8 +8,16 @@ import { useWindowWidth } from "@react-hook/window-size";
 //Redux
 //Images
 import { useDispatch, useSelector } from "react-redux";
-import { getAllConv, handleCurrentChat } from "../../../redux/reducer/Chat";
+import {
+  getAllConv,
+  handleCurrentChat,
+  handleLastMessage,
+  handleUnreadMessages,
+} from "../../../redux/reducer/Chat";
 import moment from "moment";
+import { socket } from "./index";
+import Cookies from "js-cookie";
+import { clearMessages } from "../../../redux/reducer/Message";
 
 const ContactList = ({ invitePeople }) => {
   const [activeUser, setActiveUser] = useState(null);
@@ -40,12 +48,14 @@ const ContactList = ({ invitePeople }) => {
         admin: index?.groupAdmin,
       })
     );
+
+    dispatch(clearMessages());
   };
 
   useEffect(() => {
     dispatch(
       getAllConv({
-        search: "priyanshi",
+        search: "",
       })
     );
   }, [searchValue]);
@@ -53,6 +63,35 @@ const ContactList = ({ invitePeople }) => {
   useEffect(() => {
     setActiveUser(currentChat?._id);
   }, [currentChat]);
+
+  useEffect(() => {
+    if (socket && socket.connected) {
+      socket.emit("setup", { myId: Cookies.get("refreshToken") });
+
+      socket.on("message received", (message) => {
+        if (
+          message?.sender?._id !== Cookies.get("refreshToken") &&
+          message?.chat?._id !== currentChat?._id
+        ) {
+          dispatch(
+            handleUnreadMessages({
+              _id: message?.chat?._id,
+            })
+          );
+        }
+
+        dispatch(
+          handleLastMessage({
+            chatId: message?.chat?._id,
+            content: message?.content,
+            createdAt: new Date().toISOString(),
+          })
+        );
+      });
+    } else {
+      console.log("socket not connected");
+    }
+  }, [socket, currentChat?._id]);
 
   return (
     <>

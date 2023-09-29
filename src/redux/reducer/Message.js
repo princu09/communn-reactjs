@@ -60,7 +60,7 @@ export const sendMessage = createAsyncThunk(
 
 // Mutual Groups
 export const mutualGroups = createAsyncThunk(
-  "sendMessage",
+  "mutualGroups",
   async (data, { rejectWithValue }) => {
     try {
       const res = await axios.post(
@@ -107,7 +107,12 @@ const MessageSlice = createSlice({
     },
     handleReceiveMessage: (state, action) => {
       const newMessage = action.payload;
-      state.data.push(newMessage);
+
+      if (state.data.find((message) => message._id !== newMessage._id)) {
+        return;
+      } else {
+        state.data.push(newMessage);
+      }
     },
     readMessages: (state, action) => {
       state.data.forEach((message) => {

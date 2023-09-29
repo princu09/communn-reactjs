@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ContactList from "./ContactList";
-import ChatBody, { socket } from "./ChatBody";
+import ChatBody from "./ChatBody";
 import ChatInfo from "./ChatInfo";
 import ChatFooter from "../ChatFooter";
 import classNames from "classnames";
@@ -11,8 +11,16 @@ import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddPeopleGroup from "../AddPeopleGroup";
+import io from "socket.io-client";
+
+const ENDPOINT = "http://localhost:3001";
+export var socket;
 
 const Chats = ({}) => {
+  useEffect(() => {
+    socket = io(ENDPOINT);
+  }, [io]);
+
   const [showInfo, setShowInfo] = useState(true);
   const [invitePeople, setInvitePeople] = useState(false);
   const [addToGroup, setAddToGroup] = useState(false);
@@ -37,7 +45,6 @@ const Chats = ({}) => {
 
   useEffect(() => {
     if (messageData != null) {
-      console.log("messageData", messageData);
       toast.success(messageData, {
         position: "bottom-right",
         autoClose: 5000,

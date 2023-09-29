@@ -73,28 +73,58 @@ const ChatSlice = createSlice({
   initialState,
   reducers: {
     handleCurrentChat: (state, action) => {
+      state.currentChat = undefined;
+      state.updateChat = null;
+
       state.currentChat = action.payload;
 
       const index = state.data.findIndex(
         (item) => item._id === action.payload._id
       );
+
+      state.data[index].unreadMessages = 0;
+    },
+    handleUnreadMessages: (state, action) => {
+      const index = state.data.findIndex(
+        (item) => item._id === action.payload._id
+      );
+
+      state.data[index].unreadMessages = state.data[index].unreadMessages + 1;
+    },
+    handleReadMessages: (state, action) => {
+      const index = state.data.findIndex(
+        (item) => item._id === action.payload._id
+      );
+
       state.data[index].unreadMessages = 0;
     },
     handleLastMessage: (state, action) => {
       const { chatId, content, createdAt } = action.payload;
-      const index = state.data.findIndex((item) => item._id === chatId);
-      state.data[index].lastMessage = {
-        content,
-        createdAt: new Date(createdAt).toISOString(),
-      };
-      state.data[index].updatedAt = new Date(createdAt).toISOString();
+
+      // update last message based on chatId
+      const data = state.data.map((item) => {
+        if (item._id === chatId) {
+          return {
+            ...item,
+            lastMessage: {
+              content,
+              createdAt,
+            },
+          };
+        }
+        return item;
+      });
+
+      const newChatList = data.filter((chat) => chat._id !== chatId);
+
+      const currentChatIndex = data.filter((chat) => chat._id === chatId);
+
+      newChatList.unshift(currentChatIndex[0]);
+
+      state.data = newChatList;
     },
     handleOnline: (state, action) => {
       state.currentChat.online = action.payload;
-    },
-    handleChatList: (state, action) => {
-      state.data = action.payload;
-      state.updateChat = !state.updateChat;
     },
   },
   extraReducers: {
@@ -117,7 +147,8 @@ export const {
   handleCurrentChat,
   handleLastMessage,
   handleOnline,
-  handleChatList,
+  handleUnreadMessages,
+  handleReadMessages,
 } = ChatSlice.actions;
 
 export default ChatSlice.reducer;

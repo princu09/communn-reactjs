@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Button, Dropdown, Form, InputGroup } from "react-bootstrap";
 import { ArrowRight, Share, Smile } from "react-feather";
 import { useDispatch, useSelector } from "react-redux";
-import { sendMessage as NewMessage } from "../../redux/reducer/Message";
-import { handleChatList, handleLastMessage } from "../../redux/reducer/Chat";
+import { sendMessage as sendMessageAPI } from "../../redux/reducer/Message";
+import { handleLastMessage } from "../../redux/reducer/Chat";
 
 const ChatFooter = ({ setNewMessage, setTyping }) => {
   const [message, setMessage] = useState("");
@@ -16,7 +16,7 @@ const ChatFooter = ({ setNewMessage, setTyping }) => {
 
   const sendMessage = () => {
     dispatch(
-      NewMessage({
+      sendMessageAPI({
         content: message,
         chatId: currentChat._id,
         myId: Cookies.get("refreshToken"),
@@ -27,19 +27,9 @@ const ChatFooter = ({ setNewMessage, setTyping }) => {
       handleLastMessage({
         chatId: currentChat._id,
         content: message,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       })
     );
-
-    // change chat list order
-    const newChatList = chatList.filter((chat) => chat._id !== currentChat._id);
-    const currentChatIndex = chatList.filter(
-      (chat) => chat._id === currentChat._id
-    );
-
-    newChatList.unshift(currentChatIndex[0]);
-
-    dispatch(handleChatList(newChatList));
 
     setNewMessage(true);
   };

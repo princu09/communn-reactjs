@@ -12,6 +12,7 @@ import {
 } from "../../redux/reducer/Chat";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { clearMessages } from "../../redux/reducer/Message";
 
 const AddPeopleGroup = ({ show, onClose }) => {
   const dispatch = useDispatch();
@@ -45,11 +46,14 @@ const AddPeopleGroup = ({ show, onClose }) => {
           search: Search,
         })
       );
+
       dispatch(
         handleCurrentChat({
           currentChat: res.payload.data,
         })
       );
+
+      dispatch(clearMessages());
     });
 
     onClose();

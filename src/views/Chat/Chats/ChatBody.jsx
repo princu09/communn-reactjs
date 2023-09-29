@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Dropdown, Spinner, Toast } from "react-bootstrap";
+import { Button, Dropdown, Spinner } from "react-bootstrap";
 import { CornerUpRight, MoreHorizontal } from "react-feather";
 import SimpleBar from "simplebar-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,13 +11,10 @@ import {
   readMessages,
 } from "../../../redux/reducer/Message";
 import moment from "moment";
-import io from "socket.io-client";
+import { socket } from "./index";
 import Cookies from "js-cookie";
-import { handleOnline } from "../../../redux/reducer/Chat";
+import { handleOnline, handleReadMessages } from "../../../redux/reducer/Chat";
 import HkTooltip from "../../../components/@hk-tooltip/HkTooltip";
-
-const ENDPOINT = "http://localhost:3001";
-export var socket;
 
 const ChatBody = ({
   newMessage,
@@ -27,22 +24,23 @@ const ChatBody = ({
   setIsTyping,
   setMessageData,
 }) => {
-  const avatar = "https://via.placeholder.com/150";
-
   const { currentChat } = useSelector((state) => state.chatReducer);
   const [socketConnected, setSocketConnected] = useState(false);
 
   const {
-    data: messages,
+    data: messagesList,
     pagination,
     newMessage: messageSocket,
   } = useSelector((state) => state.messageReducer);
 
+  useEffect(() => {
+    socket.on("connected", () => setSocketConnected(true));
+  }, [socket]);
+
   // Socket Logic
   useEffect(() => {
-    socket = io(ENDPOINT);
-    socket.on("connected", () => setSocketConnected(true));
     socket.emit("setup", { myId: Cookies.get("refreshToken") });
+
     socket.on("typing", (data) => {
       if (
         data.user !== Cookies.get("refreshToken") &&
@@ -64,14 +62,14 @@ const ChatBody = ({
     return () => {
       socket.emit("close", Cookies.get("refreshToken"));
     };
-  }, []);
+  }, [socketConnected]);
 
   useEffect(() => {
     socket.emit("join chat", currentChat._id, Cookies.get("refreshToken"));
 
     setTyping(false);
     setIsTyping(false);
-  }, [currentChat]);
+  }, [currentChat, socketConnected]);
 
   useEffect(() => {
     socket.on("message received", (message) => {
@@ -85,7 +83,7 @@ const ChatBody = ({
         setMessageData(message?.sender?.first_name + " sent a message");
       }
     });
-  }, []);
+  }, [currentChat]);
 
   useEffect(() => {
     if (messageSocket) {
@@ -115,7 +113,7 @@ const ChatBody = ({
       });
       setTyping(false);
     }, 5000);
-  }, [typing]);
+  }, [typing, socketConnected]);
 
   const dispatch = useDispatch();
   const [pageNo, setPageNo] = useState(1);
@@ -144,14 +142,17 @@ const ChatBody = ({
         chatId: currentChat._id,
         userId: Cookies.get("refreshToken"),
       });
+
       socket.on("read message", (data) => {
         if (
           data.chatId === currentChat._id &&
           data.userId !== Cookies.get("refreshToken")
         ) {
           dispatch(readMessages({ chatId: data.chatId }));
+          dispatch(handleReadMessages({ _id: data.chatId }));
         }
       });
+
       setIsLoading(false);
     }
   }, [currentChat, pageNo]);
@@ -185,7 +186,7 @@ const ChatBody = ({
       });
       setNewMessage(false);
     }
-  }, [messages, newMessage]);
+  }, [messagesList, newMessage]);
 
   return (
     <SimpleBar
@@ -204,7 +205,7 @@ const ChatBody = ({
             <Spinner animation="border" variant="primary" />
           </div>
         )}
-        {messages?.map((message, index) => {
+        {messagesList?.map((message, index) => {
           const messageDate = moment(message.createdAt);
           let dateLine = null;
 
@@ -333,7 +334,9 @@ const ChatBody = ({
                     <div className="msg-box">
                       <div>
                         <p>{message?.content}</p>
-                        {moment(message?.createdAt).format("hh:mm A")}
+                        <span className="chat-time">
+                          {moment(message?.createdAt).format("hh:mm A")}
+                        </span>
                       </div>
                       <div className="msg-action">
                         <Button className="btn-icon btn-flush-dark btn-rounded flush-soft-hover no-caret">
