@@ -80,11 +80,11 @@ const ChatHeader = ({
                     className="avatar-img"
                   />
                 )}
-                <HkBadge
+                {/* <HkBadge
                   bg={currentChat.online ? "success" : "danger"}
                   indicator
                   className="badge-indicator-lg position-bottom-end-overflow-1"
-                />
+                /> */}
               </div>
             </div>
             <div className="media-body">
